@@ -2,6 +2,7 @@ import os
 from argparse import ArgumentParser
 from collections import OrderedDict
 import torch
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 def extractWeights(args):
     model_path = args["model_path"]
@@ -72,8 +73,10 @@ def extractWeights(args):
                         "act_layer": model_ckpt_hparams["act_layer"],
                         "use_mean_token": model_ckpt_hparams["use_mean_token"]}
 
-    # Load Model State Dict
-    model_state_dict = model_last_ckpt["state_dict"]
+    # Load best checkpoint
+    best_model_path = model_last_ckpt["callbacks"][ModelCheckpoint]["best_model_path"]
+    best_model = torch.load(best_model_path, map_location="cpu")
+    model_state_dict = best_model["state_dict"]
 
     updated_backbone_state_dict = OrderedDict()
     updated_head_state_dict = OrderedDict()
